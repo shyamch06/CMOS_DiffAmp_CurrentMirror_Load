@@ -1,0 +1,34 @@
+* CMOS Differential Amplifier with Active Current-Mirror Load
+* 5-Transistor OTA -- AC ANALYSIS VERSION (gain + bandwidth)
+* Open in LTSpice: File > Open > "All Files" > select this .cir
+
+.param VDD=1.8
+
+VDD VDD 0 {VDD}
+
+* --- Bias current mirror (sets tail current) ---
+Iref VDD nref DC 100u
+M3 nref nref 0 0 NMOS_MODEL W=20u L=1u
+M4 ntail nref 0 0 NMOS_MODEL W=20u L=1u
+
+* --- Differential pair ---
+Vin1 vin1 0 DC 0.9 AC 1
+Vin2 vin2 0 DC 0.9
+M1 outp vin1 ntail 0 NMOS_MODEL W=40u L=1u
+M2 outn vin2 ntail 0 NMOS_MODEL W=40u L=1u
+
+* --- Active current-mirror load (PMOS) ---
+M5 outp outp VDD VDD PMOS_MODEL W=40u L=1u
+M6 outn outp VDD VDD PMOS_MODEL W=40u L=1u
+
+* --- Load capacitance for bandwidth measurement ---
+CL outn 0 1p
+
+* --- Generic transistor models (0.18um-like, illustrative) ---
+.model NMOS_MODEL NMOS (LEVEL=1 VTO=0.4 KP=200u LAMBDA=0.05)
+.model PMOS_MODEL PMOS (LEVEL=1 VTO=-0.4 KP=100u LAMBDA=0.05)
+
+* --- Analysis: AC sweep gives gain (dB) and -3dB bandwidth ---
+.ac dec 20 1 1G
+
+.end
